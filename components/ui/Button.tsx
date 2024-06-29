@@ -3,26 +3,29 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 import { cn } from "../../lib/utils";
 
-const buttonVariants = cva("flex flex-row gap-2 items-center justify-center", {
-  variants: {
-    variant: {
-      default: "bg-primary",
-      secondary: "bg-secondary",
-      destructive: "bg-destructive",
-      ghost: "bg-slate-700",
-      link: "text-primary underline-offset-4",
+const buttonVariants = cva(
+  "flex flex-row gap-2 items-center justify-center overflow-hidden",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary",
+        secondary: "bg-secondary",
+        destructive: "bg-destructive",
+        ghost: "bg-slate-700",
+        link: "text-primary underline-offset-4",
+      },
+      size: {
+        default: "h-10 px-4",
+        sm: "h-8 px-2",
+        lg: "h-12 px-8",
+      },
     },
-    size: {
-      default: "h-10 px-4",
-      sm: "h-8 px-2",
-      lg: "h-12 px-8",
+    defaultVariants: {
+      variant: "default",
+      size: "default",
     },
   },
-  defaultVariants: {
-    variant: "default",
-    size: "default",
-  },
-});
+);
 
 const buttonTextVariants = cva("text-center font-[SpaceMono] font-medium", {
   variants: {
@@ -51,6 +54,7 @@ interface ButtonProps
   label: string | React.ReactNode;
   labelClasses?: string;
   leftSection?: React.ReactNode;
+  marquee?: boolean;
 }
 function Button({
   label,
@@ -59,6 +63,7 @@ function Button({
   variant,
   size,
   leftSection,
+  marquee,
   ...props
 }: ButtonProps) {
   return (
@@ -77,10 +82,39 @@ function Button({
       {typeof label === "string" ? (
         <Text
           className={cn(
+            marquee && "animate-marquee whitespace-nowrap",
             buttonTextVariants({ variant, size, className: labelClasses }),
           )}
         >
           {label}
+          {marquee && (
+            <>
+              <Text
+                className={cn(
+                  "absolute left-[102%]",
+                  buttonTextVariants({
+                    variant,
+                    size,
+                    className: labelClasses,
+                  }),
+                )}
+              >
+                {label}
+              </Text>
+              <Text
+                className={cn(
+                  "absolute right-[102%]",
+                  buttonTextVariants({
+                    variant,
+                    size,
+                    className: labelClasses,
+                  }),
+                )}
+              >
+                {label}
+              </Text>
+            </>
+          )}
         </Text>
       ) : (
         label

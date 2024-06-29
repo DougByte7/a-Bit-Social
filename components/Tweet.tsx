@@ -56,7 +56,12 @@ export default function Tweet({
         </Avatar>
 
         <View className="items-start justify-center">
-          <Button className="h-auto p-0" variant="link" label={authorName} />
+          <Button
+            marquee={authorName.length > 30}
+            className="h-auto max-w-80 justify-start p-0"
+            variant="link"
+            label={authorName}
+          />
           <Text className="font-[SpaceMono] text-xs">{authorHandle}</Text>
         </View>
       </CardHeader>

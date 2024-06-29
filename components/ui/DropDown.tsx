@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { Animated, Text, View } from "react-native";
 
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 import { useClickOutside } from "react-native-click-outside";
 
 interface DropDownContextType {

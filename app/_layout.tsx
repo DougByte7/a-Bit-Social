@@ -6,6 +6,7 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
@@ -17,6 +18,7 @@ import { ClickOutsideProvider } from "react-native-click-outside";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  ScreenOrientation.unlockAsync();
   const { colorScheme } = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),

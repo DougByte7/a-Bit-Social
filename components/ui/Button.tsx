@@ -1,31 +1,29 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { Text, TouchableOpacity, View } from "react-native";
-
+import { Marquee } from "@animatereactnative/marquee";
 import { cn } from "../../lib/utils";
+import { ReactNode } from "react";
 
-const buttonVariants = cva(
-  "flex flex-row gap-2 items-center justify-center overflow-hidden",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary",
-        secondary: "bg-secondary",
-        destructive: "bg-destructive",
-        ghost: "bg-slate-700",
-        link: "text-primary underline-offset-4",
-      },
-      size: {
-        default: "h-10 px-4",
-        sm: "h-8 px-2",
-        lg: "h-12 px-8",
-      },
+const buttonVariants = cva("flex flex-row gap-2 items-center justify-center", {
+  variants: {
+    variant: {
+      default: "bg-primary",
+      secondary: "bg-secondary",
+      destructive: "bg-destructive",
+      ghost: "bg-slate-700",
+      link: "text-primary underline-offset-4",
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+    size: {
+      default: "h-10 px-4",
+      sm: "h-8 px-2",
+      lg: "h-12 px-8",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+    size: "default",
+  },
+});
 
 const buttonTextVariants = cva("text-center font-[SpaceMono] font-medium", {
   variants: {
@@ -68,6 +66,8 @@ function Button({
 }: ButtonProps) {
   return (
     <TouchableOpacity
+      role="button"
+      aria-label={typeof label === "string" ? label : undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
@@ -79,47 +79,48 @@ function Button({
         </>
       )}
       {leftSection}
-      {typeof label === "string" ? (
-        <Text
-          className={cn(
-            marquee && "animate-marquee whitespace-nowrap",
-            buttonTextVariants({ variant, size, className: labelClasses }),
-          )}
-        >
-          {label}
-          {marquee && (
-            <>
-              <Text
-                className={cn(
-                  "absolute left-[102%]",
-                  buttonTextVariants({
-                    variant,
-                    size,
-                    className: labelClasses,
-                  }),
-                )}
-              >
-                {label}
-              </Text>
-              <Text
-                className={cn(
-                  "absolute right-[102%]",
-                  buttonTextVariants({
-                    variant,
-                    size,
-                    className: labelClasses,
-                  }),
-                )}
-              >
-                {label}
-              </Text>
-            </>
-          )}
-        </Text>
+
+      {marquee ? (
+        <Marquee style={{ flex: 1 }} spacing={20} speed={0.4}>
+          <ButtonLabel
+            label={label}
+            variant={variant}
+            size={size}
+            labelClasses={labelClasses}
+          />
+        </Marquee>
       ) : (
-        label
+        <ButtonLabel
+          label={label}
+          variant={variant}
+          size={size}
+          labelClasses={labelClasses}
+        />
       )}
     </TouchableOpacity>
+  );
+}
+
+interface ButtonLabelProps extends VariantProps<typeof buttonVariants> {
+  label: ReactNode;
+  labelClasses?: string;
+}
+function ButtonLabel({ label, variant, size, labelClasses }: ButtonLabelProps) {
+  return typeof label === "string" ? (
+    <Text
+      className={cn(
+        buttonTextVariants({
+          variant,
+          size,
+          className: labelClasses,
+        }),
+        "text-nowrap flex-nowrap whitespace-nowrap break-keep",
+      )}
+    >
+      {label}
+    </Text>
+  ) : (
+    label
   );
 }
 

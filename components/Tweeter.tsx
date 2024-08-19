@@ -26,7 +26,7 @@ export function Tweeter() {
         className="grow"
         placeholder="Reclame aqui!"
         multiline
-        numberOfLines={4}
+        rows={4}
         maxLength={280}
         value={message}
         onChangeText={setMessage}

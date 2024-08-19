@@ -5,10 +5,11 @@ import {
   Repeat2,
   Skull,
   HandMetal,
+  Flag,
 } from "lucide-react-native";
-import { View, Text } from "react-native";
+import { View, Text, Linking } from "react-native";
 import { Image } from "expo-image";
-import { Avatar, AvatarFallback } from "./ui/Avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/Avatar";
 import { Card, CardHeader, CardContent, CardFooter } from "./ui/Card";
 import {
   DropDown,
@@ -18,6 +19,39 @@ import {
 } from "./ui/DropDown";
 import { messageAtom, triggerFocusAtom } from "./Tweeter";
 import { Button } from "./ui/Button";
+import { cn } from "@/lib/utils";
+const scicastLogo = require("@/assets/images/scicast.jpg");
+
+function timeSince(isoDate: string) {
+  const seconds = Math.floor(
+    (new Date().getTime() - new Date(isoDate).getTime()) / 1000,
+  );
+
+  let interval = seconds / 31536000;
+
+  // if (interval > 1) {
+  //   return Math.floor(interval) + " anos";
+  // }
+  interval = seconds / 2592000;
+  // if (interval > 1) {
+  //   return Math.floor(interval) + " meses";
+  // }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    // return Math.floor(interval) + " dias";
+    return new Date(isoDate).toLocaleDateString();
+  }
+
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return Math.floor(interval) + " horas";
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    return Math.floor(interval) + " minutos";
+  }
+  return Math.floor(seconds) + " segundos";
+}
 
 enum Interaction {
   REPLY = "r",
@@ -25,15 +59,21 @@ enum Interaction {
 }
 interface TweetProps {
   id: string;
+  avatarUri?: string;
   authorName: string;
   authorHandle: string;
   content: string;
+  date: string;
+  link?: string;
 }
 export default function Tweet({
   id,
+  avatarUri,
   authorHandle,
   authorName,
   content,
+  date,
+  link,
 }: TweetProps) {
   const [, setMessage] = useAtom(messageAtom);
   const [, setTriggerFocus] = useAtom(triggerFocusAtom);
@@ -41,35 +81,61 @@ export default function Tweet({
   const imgMark = /\[img\]\((.*)\)/;
   const imgSrc = content.match(imgMark)?.[1];
 
+  const handleOpenProfile = async () => {
+    if (link) {
+      const supported = await Linking.canOpenURL(link);
+
+      if (supported) {
+        await Linking.openURL(link);
+      }
+    }
+  };
+
   const handleInteract = (interaction: Interaction) => () => {
     setMessage(`${interaction}:${Math.floor(Math.random() * 100_000)} `);
     setTriggerFocus((prev) => prev + 1);
   };
 
   return (
-    <Card className="mx-auto w-full max-w-[400px]">
+    <Card className="mx-auto w-full">
       <CardHeader className="flex-row items-center gap-2">
         <Avatar>
+          {(avatarUri || authorHandle === "Scicast") && (
+            <AvatarImage
+              source={
+                authorHandle === "Scicast" ? scicastLogo : { uri: avatarUri }
+              }
+            />
+          )}
           <AvatarFallback>
             <Ghost color="hsl(84.25 87.33% 43.33%)" />
           </AvatarFallback>
         </Avatar>
 
-        <View className="items-start justify-center">
+        <View className="flex-1 items-start justify-center overflow-hidden">
           <Button
             marquee={authorName.length > 30}
-            className="h-auto max-w-80 justify-start p-0"
+            className={cn(link && "w-full", "h-auto px-0")}
             variant="link"
             label={authorName}
+            onPress={handleOpenProfile}
           />
-          <Text className="font-[SpaceMono] text-xs">{authorHandle}</Text>
+          <Text className="font-[SpaceMono] text-xs">
+            {authorHandle} - {timeSince(date)}
+          </Text>
         </View>
+        {!link && (
+          <Button
+            variant="link"
+            label={<Flag size={18} color="hsl(8.82 90.43% 63.14%)" />}
+          />
+        )}
       </CardHeader>
 
       <CardContent>
         <Text className="font-[SpaceMono]">{content.replace(imgMark, "")}</Text>
         {imgSrc && (
-          <View className="mx-auto mt-2 size-80">
+          <View className="mx-auto mt-2 h-80 w-80">
             <Image
               style={{ width: "100%", flex: 1 }}
               source={imgSrc}
@@ -80,27 +146,29 @@ export default function Tweet({
         )}
       </CardContent>
 
-      <CardFooter className="mx-auto my-2 max-w-[350px] items-center justify-around gap-2">
-        <Button
-          variant="secondary"
-          label={<MessageCircle color="black" size={16} />}
-          onPress={handleInteract(Interaction.REPLY)}
-        />
-        <Button
-          variant="secondary"
-          label={<Repeat2 color="black" size={16} />}
-          onPress={handleInteract(Interaction.SHARE)}
-        />
+      {!link && (
+        <CardFooter className="mx-auto my-2 max-w-[350px] items-center justify-around gap-2">
+          <Button
+            variant="secondary"
+            label={<MessageCircle color="black" size={16} />}
+            onPress={handleInteract(Interaction.REPLY)}
+          />
+          <Button
+            variant="secondary"
+            label={<Repeat2 color="black" size={16} />}
+            onPress={handleInteract(Interaction.SHARE)}
+          />
 
-        <ButtonYeah />
+          <ButtonYeah />
 
-        <Button
-          variant="destructive"
-          labelClasses="no-underline"
-          leftSection={<Skull color="white" size={16} />}
-          label="Nah..."
-        />
-      </CardFooter>
+          <Button
+            variant="destructive"
+            labelClasses="no-underline"
+            leftSection={<Skull color="white" size={16} />}
+            label="Nah..."
+          />
+        </CardFooter>
+      )}
     </Card>
   );
 }

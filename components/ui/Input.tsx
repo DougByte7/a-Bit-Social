@@ -8,6 +8,7 @@ export interface InputProps
   label?: string;
   labelClasses?: string;
   inputClasses?: string;
+  rows?: number;
 }
 const Input = forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
   ({ className, label, labelClasses, inputClasses, ...props }, ref) => (
